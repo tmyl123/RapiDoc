@@ -39,7 +39,7 @@ function defaultContentTemplate() {
 function focusedTagBodyTemplate(tag) {
   return html`
     <h1 id="${tag.elementId}">${tag.name}</h1>
-    ${this.onNavTagClick === 'show-description' && tag.description
+    ${['show-description', 'expand-collapse-and-show-description'].includes(this.onNavTagClick) && tag.description
       ? html`
         <div class="m-markdown">
           ${

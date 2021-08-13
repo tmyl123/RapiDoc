@@ -3,7 +3,7 @@ import OpenApiParser from '@apitools/openapi-parser';
 import marked from 'marked';
 import { invalidCharsRegEx, rapidocApiKey } from '~/utils/common-utils';
 
-export default async function ProcessSpec(specUrl, generateMissingTags = false, sortTags = false, sortEndpointsBy = '', attrApiKey = '', attrApiKeyLocation = '', attrApiKeyValue = '', serverUrl = '') {
+export default async function ProcessSpec(specUrl, generateMissingTags = false, sortTags = false, sortEndpointsBy = '', attrApiKey = '', attrApiKeyLocation = '', attrApiKeyValue = '', serverUrl = '', allowEmptyPathTags = false) {
   let jsonParsedSpec;
   try {
     let specMeta;
@@ -35,7 +35,25 @@ export default async function ProcessSpec(specUrl, generateMissingTags = false, 
   // const pathGroups = groupByPaths(jsonParsedSpec);
 
   // Tags with Paths and WebHooks
-  const tags = groupByTags(jsonParsedSpec, generateMissingTags, sortTags, sortEndpointsBy);
+  const tagsFilteredAndProcessed = groupByTags(jsonParsedSpec, generateMissingTags, sortTags, sortEndpointsBy);
+  const tagsAllRaw = jsonParsedSpec.tags && Array.isArray(jsonParsedSpec.tags)
+    ? jsonParsedSpec.tags.map((v) => ({
+      show: true,
+      elementId: `tag--${v.name.replace(invalidCharsRegEx, '-')}`,
+      name: v.name,
+      description: v.description || '',
+      headers: v.description ? getHeadersFromMarkdown(v.description) : [],
+      paths: [],
+      expanded: v['x-tag-expanded'] !== false,
+    }))
+    : [];
+
+  const tags = allowEmptyPathTags
+    ? tagsAllRaw.map((tag) => {
+      const processedTag = tagsFilteredAndProcessed.find((x) => x.elementId === tag.elementId);
+      return processedTag ? processedTag : tag;
+    })
+    : tagsFilteredAndProcessed;
 
   // Components
   const components = getComponents(jsonParsedSpec);

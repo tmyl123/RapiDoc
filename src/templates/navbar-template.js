@@ -1,6 +1,6 @@
 import { html } from 'lit-element';
 import marked from 'marked';
-import { pathIsInSearch } from '~/utils/common-utils';
+import { pathIsInSearch, tagIsInSearch } from '~/utils/common-utils';
 
 export function expandCollapseNavBarTag(navLinkEl, action = 'toggle') {
   const tagAndPathEl = navLinkEl?.closest('.nav-bar-tag-and-paths');
@@ -136,7 +136,13 @@ export default function navbarTemplate() {
 
       <!-- TAGS AND PATHS-->
       ${this.resolvedSpec.tags
-        .filter((tag) => tag.paths.filter((path) => pathIsInSearch(this.matchPaths, path)).length)
+        .filter((tag) => this.allowSearchInTags
+           ? tag.paths.filter((path) => pathIsInSearch(this.matchPaths, path)).length || tagIsInSearch(this.matchPaths, tag)
+           : tag.paths.filter((path) => pathIsInSearch(this.matchPaths, path)).length)
+        .map((tag) => {
+           if (this.allowSearchInTags && this.matchPaths) tag.expanded = tagIsInSearch(this.matchPaths, tag);
+           return tag;
+        })
         .map((tag) => html`
           <div class='nav-bar-tag-and-paths ${tag.expanded ? 'expanded' : 'collapsed'}'>
             ${tag.name === 'General ⦂'
@@ -149,6 +155,9 @@ export default function navbarTemplate() {
                   data-first-path-id='${tag.firstPathId}'
                   @click='${(e) => {
                     if (this.renderStyle === 'focused' && this.onNavTagClick === 'expand-collapse') {
+                      onExpandCollapse.call(this, e);
+                    } else if (this.renderStyle === 'focused' && this.onNavTagClick === 'expand-collapse-and-show-description') {
+                      this.scrollToEventTarget(e, false);
                       onExpandCollapse.call(this, e);
                     } else {
                       this.scrollToEventTarget(e, false);
@@ -188,7 +197,9 @@ export default function navbarTemplate() {
               <!-- Paths in each tag (endpoints) -->
               ${tag.paths.filter((v) => {
                 if (this.matchPaths) {
-                  return pathIsInSearch(this.matchPaths, v);
+                  return this.allowSearchInTags
+                             ? true
+                             : pathIsInSearch(this.matchPaths, v);
                 }
                 return true;
               }).map((p) => html`

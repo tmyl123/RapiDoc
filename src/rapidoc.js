@@ -87,6 +87,7 @@ export default class RapiDoc extends LitElement {
       allowSpecFileLoad: { type: String, attribute: 'allow-spec-file-load' },
       allowSearch: { type: String, attribute: 'allow-search' },
       allowAdvancedSearch: { type: String, attribute: 'allow-advanced-search' },
+      allowSearchInTags: { type: String, attribute: 'allow-search-in-tags' },
       allowServerSelection: { type: String, attribute: 'allow-server-selection' },
       allowSchemaDescriptionExpandToggle: { type: String, attribute: 'allow-schema-description-expand-toggle' },
       showComponents: { type: String, attribute: 'show-components' },
@@ -429,13 +430,14 @@ export default class RapiDoc extends LitElement {
     this.schemaHideReadOnly += ['get', 'head', 'delete', 'options'];
     this.schemaHideWriteOnly = this.schemaHideWriteOnly !== 'never';
     if (!this.fillRequestFieldsWithExample || !'true, false,'.includes(`${this.fillRequestFieldsWithExample},`)) { this.fillRequestFieldsWithExample = 'true'; }
-    if (!this.onNavTagClick || !'expand-collapse, show-description,'.includes(`${this.onNavTagClick},`)) { this.onNavTagClick = 'expand-collapse'; }
+    if (!this.onNavTagClick || !'expand-collapse, show-description, expand-collapse-and-show-description,'.includes(`${this.onNavTagClick},`)) { this.onNavTagClick = 'expand-collapse'; }
     if (!this.responseAreaHeight) {
       this.responseAreaHeight = '300px';
     }
 
     if (!this.allowSearch || !'true, false,'.includes(`${this.allowSearch},`)) { this.allowSearch = 'true'; }
     if (!this.allowAdvancedSearch || !'true, false,'.includes(`${this.allowAdvancedSearch},`)) { this.allowAdvancedSearch = 'true'; }
+    if (!this.allowSearchInTags || !'true, false,'.includes(`${this.allowSearchInTags},`)) { this.allowSearchInTags = 'false'; }
 
     if (!this.allowTry || !'true, false,'.includes(`${this.allowTry},`)) { this.allowTry = 'true'; }
     if (!this.apiKeyValue) { this.apiKeyValue = '-'; }
@@ -667,6 +669,7 @@ export default class RapiDoc extends LitElement {
         this.getAttribute('api-key-location'),
         this.getAttribute('api-key-value'),
         this.getAttribute('server-url'),
+        this.getAttribute('allow-emptypath-tags'),
       );
       this.loading = false;
       this.afterSpecParsedAndValidated(spec);

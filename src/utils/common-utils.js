@@ -53,6 +53,11 @@ export function pathIsInSearch(searchVal, path) {
   return stringToSearch.includes(searchVal.toLowerCase());
 }
 
+export function tagIsInSearch(searchVal, tag) {
+  const stringToSearch = `${tag.name} ${tag.description}`.toLowerCase();
+  return stringToSearch.includes(searchVal.toLowerCase());
+}
+
 export function schemaKeys(schemaProps, result = new Set()) {
   if (!schemaProps) {
     return result;
